@@ -36,12 +36,13 @@
     let longitude = geoJsonData[0].lon
     console.log(latitude)
     console.log(longitude)
-    requestWeather(latitude, longitude)
-    requestForecast(latitude, longitude)
-    return geoJsonData
+    let coordinatesObj = {
+      lat: latitude,
+      lon: longitude
+    }
+    return coordinatesObj
   }
   async function requestWeather(latitude, longitude) {
-    await requestLocation()
     let weatherAPIUrl = "https://api.openweathermap.org/data/2.5/weather?"
     let weatherParameters = {
       lat: latitude,
@@ -58,7 +59,6 @@
   }
 
   async function requestForecast(latitude, longitude) {
-    await requestLocation()
     let forecastAPIUrl = "https://api.openweathermap.org/data/2.5/forecast?"
     let forecastParameters = {
       lat: latitude,
@@ -75,60 +75,60 @@
   }
 // });
 
-// let searchButton = document.getElementById('search')
-// searchButton.addEventListener('click', weatherToday)
-// function weatherToday(){
-//     //create
-//     todayContainer = document.createElement('div')
-//     todayDate = document.createElement('h1')
-//     weatherContainer = document.createElement('ul')
-//     temp = document.createElement('li')
-//     wind = document.createElement('li')
-//     humidity = document.createElement('li')
-//     //attr
-//     todayContainer.classList.add('today')
-//     todayDate.textContent = "Today's data"
-//     weatherContainer.classList.add('today')
-//     temp.textContent = 'Temperature'
-//     wind.textContent = 'Wind'
-//     humidity.textContent = 'Humidity'
-//     //append
-//     document.body.appendChild(todayContainer)
-//     todayContainer.appendChild(todayDate)
-//     todayContainer.appendChild(weatherContainer)
-//     weatherContainer.appendChild(temp)
-//     weatherContainer.appendChild(wind)
-//     weatherContainer.appendChild(humidity)
+let searchButton = document.getElementById('search')
+searchButton.addEventListener('click', weatherToday)
+function weatherToday(){
+    //create
+    todayContainer = document.createElement('div')
+    todayDate = document.createElement('h1')
+    weatherContainer = document.createElement('ul')
+    temp = document.createElement('li')
+    wind = document.createElement('li')
+    humidity = document.createElement('li')
+    //attr
+    todayContainer.classList.add('today')
+    todayDate.textContent = "Today's data"
+    weatherContainer.classList.add('today')
+    temp.textContent = 'Temperature'
+    wind.textContent = 'Wind'
+    humidity.textContent = 'Humidity'
+    //append
+    document.body.appendChild(todayContainer)
+    todayContainer.appendChild(todayDate)
+    todayContainer.appendChild(weatherContainer)
+    weatherContainer.appendChild(temp)
+    weatherContainer.appendChild(wind)
+    weatherContainer.appendChild(humidity)
 
-//     weatherForecast()
-// }
+    weatherForecast()
+}
 
-// function weatherForecast(){
-//     forecastContainer = document.createElement('div')
-//     forecastText = document.createElement('h2')
-//     for (let i = 0; i < 5; i++) {
-//         //create
-//         forecastBox = document.createElement('div')
-//         forecastDate = document.createElement('h3')
-//         forecastIcon = document.createElement('div')
-//         forecastTemp = document.createElement('li')
-//         forecastWind = document.createElement('li')
-//         forecastHumidity = document.createElement('li')
+function weatherForecast(){
+    forecastContainer = document.createElement('div')
+    forecastText = document.createElement('h2')
+    for (let i = 0; i < 5; i++) {
+        //create
+        forecastBox = document.createElement('div')
+        forecastDate = document.createElement('h3')
+        forecastIcon = document.createElement('div')
+        forecastTemp = document.createElement('li')
+        forecastWind = document.createElement('li')
+        forecastHumidity = document.createElement('li')
 
-//         //attr
-//         forecastBox.classList.add('forecast')
-//         forecastDate.textContent = 'Forecast Date'
-//         forecastIcon.textContent = 'cloudy'
-//         forecastTemp.textContent = 'Forecast Temp'
-//         forecastWind.textContent = 'Forecast Wind'
-//         forecastHumidity.textContent = 'Forecast Humidity'
+        //attr
+        forecastBox.classList.add('forecast')
+        forecastDate.textContent = 'Forecast Date'
+        forecastIcon.textContent = 'cloudy'
+        forecastTemp.textContent = 'Forecast Temp'
+        forecastWind.textContent = 'Forecast Wind'
+        forecastHumidity.textContent = 'Forecast Humidity'
 
-//         //append
-//         document.body.appendChild(forecastBox)
-//         forecastBox.appendChild(forecastDate)
-//         forecastBox.appendChild(forecastIcon)
-//         forecastBox.appendChild(forecastTemp)
-//         forecastBox.appendChild(forecastWind)
-//         forecastBox.appendChild(forecastHumidity)
-//     }
-// }
+        //append
+        document.body.appendChild(forecastBox)
+        forecastBox.appendChild(forecastDate)
+        forecastBox.appendChild(forecastIcon)
+        forecastBox.appendChild(forecastTemp)
+        forecastBox.appendChild(forecastWind)
+        forecastBox.appendChild(forecastHumidity)
+    }
+}
