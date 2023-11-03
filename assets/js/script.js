@@ -15,48 +15,65 @@
 // example is New Brunswick 5 day forecast
 // https://api.openweathermap.org/data/2.5/forecast?lat=40.4862174&lon=-74.4518173&units=imperial&appid=161b355a9dd41b55204725cd903f95ab
 //
-
-$(function () {
+// $(function () {
   // 'https://api.openweathermap.org/geo/1.0/direct?q=' + '{user-input}' + '&limit=1&appid=161b355a9dd41b55204725cd903f95ab'
-  let locationURL =
-    "https://api.openweathermap.org/geo/1.0/direct?q=New+Brunswick&limit=1&appid=161b355a9dd41b55204725cd903f95ab";
-
+  $('#search').on("click", requestLocation)
   async function requestLocation() {
-    let response = await fetch(locationURL);
-    let jsonData = await response.json();
-    // console.log(jsonData[0].lat)
-    // console.log(jsonData[0].lon)
-    // console.log(Object.keys(jsonData))
-    // console.log(typeof(jsonData))
-    var latitude = "lat=" + String(jsonData[0].lat) + "&";
-    var longitude = "lon=" + String(jsonData[0].lon);
+    let geoAPIUrl =
+    "https://api.openweathermap.org/geo/1.0/direct?"
+    let locationQuery = $('input:text').val()
+    let geoParameters = {
+      q: locationQuery,
+      limit: 1,
+      appid: "161b355a9dd41b55204725cd903f95ab",
+    }
+    let geoSearchParams = new URLSearchParams(geoParameters)
+    let locationURL = geoAPIUrl + geoSearchParams
+    let geoResponse = await fetch(locationURL);
+    let geoJsonData = await geoResponse.json();
+    console.log(locationURL)
+    let latitude = geoJsonData[0].lat
+    let longitude = geoJsonData[0].lon
+    console.log(latitude)
+    console.log(longitude)
     requestWeather(latitude, longitude)
+    requestForecast(latitude, longitude)
+    return geoJsonData
   }
-  // pass longitude and latitude down here
-  // let weatherURL = 'https://api.openweathermap.org/data/2.5/weather?' + latitude + longitude +  '&units=imperial&appid=161b355a9dd41b55204725cd903f95ab';
-  // let weatherURL = 'https://api.openweathermap.org/data/2.5/weather?lat=40.4862174&lon=-74.4518173&units=imperial&appid=161b355a9dd41b55204725cd903f95ab'
-  async function requestWeather(param1, param2) {
+  async function requestWeather(latitude, longitude) {
     await requestLocation()
-    let weatherURL =
-      "https://api.openweathermap.org/data/2.5/weather?" +
-      param1 +
-      param2 +
-      "&units=imperial&appid=161b355a9dd41b55204725cd903f95ab";
-    let response = await fetch(weatherURL);
-    let jsonData = await response.json();
-    console.log(Object.keys(jsonData));
+    let weatherAPIUrl = "https://api.openweathermap.org/data/2.5/weather?"
+    let weatherParameters = {
+      lat: latitude,
+      lon: longitude,
+      units: "imperial",
+      appid: "161b355a9dd41b55204725cd903f95ab"
+    }
+    let weatherSearchParams = new URLSearchParams(weatherParameters)
+    let weatherURL = weatherAPIUrl + weatherSearchParams
+    console.log(weatherURL)
+    let weatherResponse = await fetch(weatherURL);
+    let weatherJsonData = await weatherResponse.json();
+    return weatherJsonData
   }
-  requestWeather()
 
-  // $(function() {
-  //     let forecastURL = 'https://api.openweathermap.org/data/2.5/forecast?lat=40.4862174&lon=-74.4518173&units=imperial&appid=161b355a9dd41b55204725cd903f95ab';
-
-  //     async function requestForecast() {
-  //         let response = await fetch(forecastURL);
-  //         let jsonData = await response.json();
-  //         console.log(Object.keys(jsonData))
-  //     }
-});
+  async function requestForecast(latitude, longitude) {
+    await requestLocation()
+    let forecastAPIUrl = "https://api.openweathermap.org/data/2.5/forecast?"
+    let forecastParameters = {
+      lat: latitude,
+      lon: longitude,
+      units: "imperial",
+      appid: "161b355a9dd41b55204725cd903f95ab"
+    }
+    let forecastSearchParams = new URLSearchParams(forecastParameters)
+    let forecastURL = forecastAPIUrl + forecastSearchParams
+    console.log(forecastAPIUrl)
+    let forecastResponse = await fetch(forecastURL);
+    let forecastJsonData = await forecastResponse.json();
+    return forecastJsonData
+  }
+// });
 
 // let searchButton = document.getElementById('search')
 // searchButton.addEventListener('click', weatherToday)
