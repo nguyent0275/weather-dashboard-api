@@ -100,10 +100,10 @@ function weatherTodayEl(weatherJsonData) {
 function fiveDayForecastEl(forecastJsonData) {
   let forecastContainer = $("<div>");
   let forecastText = $("<h2>");
-  forecastContainer.addClass("forecastDivContainer")
+  forecastContainer.addClass("forecast-container")
   forecastText.text("5 Day Forecast")
+  $(document.body).append(forecastText)
   $(document.body).append(forecastContainer)
-  forecastContainer.append(forecastText)
 
   for (let i = 0; i < 5; i++) {
     //create
