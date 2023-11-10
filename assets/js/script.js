@@ -1,4 +1,17 @@
-$("#search").on("click", requestWeather);
+let currentDate = dayjs().format("MMMM DD YYYY")
+$("#search").on("click", createElement);
+async function createElement() {
+  await requestLocation();
+  saveLocation()
+}
+
+function saveLocation(){
+  localStorage.setItem("location", $("input:text").val())
+  localStorage.getItem("location")
+  let savedlocation = $('</li>')
+  savedlocation.text(localStorage.getItem("location"))
+  $('locations').append(savedlocation)
+}
 
 async function requestLocation() {
   let geoAPIUrl = "https://api.openweathermap.org/geo/1.0/direct?";
@@ -17,14 +30,11 @@ async function requestLocation() {
   let longitude = geoJsonData[0].lon;
   console.log(latitude);
   console.log(longitude);
-  return {
-    "latitude" : latitude,
-    "longitude" : longitude
-  }
+  await requestWeather(latitude, longitude);
+  await requestForecast(latitude, longitude);
 }
 
-async function requestWeather() {
-  await requestLocation();
+async function requestWeather(latitude, longitude) {
   let weatherAPIUrl = "https://api.openweathermap.org/data/2.5/weather?";
   let weatherParameters = {
     lat: latitude,
@@ -37,11 +47,11 @@ async function requestWeather() {
   console.log(weatherURL);
   let weatherResponse = await fetch(weatherURL);
   let weatherJsonData = await weatherResponse.json();
-  return weatherJsonData;
+  console.log(weatherJsonData);
+  weatherTodayEl(weatherJsonData);
 }
 
-async function requestForecast() {
-  await requestLocation();
+async function requestForecast(latitude, longitude) {
   let forecastAPIUrl = "https://api.openweathermap.org/data/2.5/forecast?";
   let forecastParameters = {
     lat: latitude,
@@ -51,79 +61,83 @@ async function requestForecast() {
   };
   let forecastSearchParams = new URLSearchParams(forecastParameters);
   let forecastURL = forecastAPIUrl + forecastSearchParams;
-  console.log(forecastAPIUrl);
+  console.log(forecastURL);
   let forecastResponse = await fetch(forecastURL);
   let forecastJsonData = await forecastResponse.json();
-  return forecastJsonData;
+  console.log(forecastJsonData);
+  fiveDayForecastEl(forecastJsonData);
 }
-// });
+let iconUrl = "https://openweathermap.org/img/wn/"
+let iconTag = "@2x.png"
 
-async function createElement() {
-  await getWeather();
-  weatherTodayEl;
-  weatherForecastEl;
-}
-
-function weatherTodayEl() {
+function weatherTodayEl(weatherJsonData) {
   //create
-  todayContainer = document.createElement("div");
-  todayDate = document.createElement("h1");
-  weatherContainer = document.createElement("ul");
-  temp = document.createElement("li");
-  wind = document.createElement("li");
-  humidity = document.createElement("li");
+  let todayContainer = $("<div>");
+  let todayDate = $("<h1>");
+  let weatherContainer = $("<ul>");
+  let weatherIcon = $("<img>")
+  let temp = $("<li>");
+  let wind = $("<li>");
+  let humidity = $("<li>");
   //attr
-  todayContainer.classList.add("today");
-  todayDate.textContent = "Today's data";
-  weatherContainer.classList.add("today");
-  temp.textContent = "Temperature";
-  wind.textContent = "Wind";
-  humidity.textContent = "Humidity";
+  todayContainer.addClass("today");
+  todayDate.text($("input:text").val() + " " + currentDate);
+  weatherContainer.addClass("today");
+  weatherIcon.attr("src", iconUrl + weatherJsonData.weather[0].icon + iconTag); 
+  temp.text("Temperature: " + weatherJsonData.main.temp + " °F");
+  wind.text("Wind: " +weatherJsonData.wind.speed + " mph");
+  humidity.text("Humidity: " +weatherJsonData.main.humidity + " %");
   //append
-  document.body.appendChild(todayContainer);
-  todayContainer.appendChild(todayDate);
-  todayContainer.appendChild(weatherContainer);
-  weatherContainer.appendChild(temp);
-  weatherContainer.appendChild(wind);
-  weatherContainer.appendChild(humidity);
-
-  weatherForecast();
+  $(document.body).append(todayContainer);
+  todayContainer.append(todayDate);
+  todayContainer.append(weatherIcon)
+  todayContainer.append(weatherContainer);
+  weatherContainer.append(temp);
+  weatherContainer.append(wind);
+  weatherContainer.append(humidity);
 }
 
-function weatherForecastEl() {
-  forecastContainer = document.createElement("div");
-  forecastText = document.createElement("h2");
+function fiveDayForecastEl(forecastJsonData) {
+  let forecastContainer = $("<div>");
+  let forecastText = $("<h2>");
+  forecastContainer.addClass("forecastDivContainer")
+  forecastText.text("5 Day Forecast")
+  $(document.body).append(forecastContainer)
+  forecastContainer.append(forecastText)
+
   for (let i = 0; i < 5; i++) {
     //create
-    forecastBox = document.createElement("div");
-    forecastDate = document.createElement("h3");
-    forecastIcon = document.createElement("div");
-    forecastTemp = document.createElement("li");
-    forecastWind = document.createElement("li");
-    forecastHumidity = document.createElement("li");
+    console.log(forecastJsonData.list[i].weather[0].icon)
+    console.log(typeof(forecastJsonData.list[i].weather[0].icon))
+    let forecastBox = $("<div>");
+    let forecastDate = $("<h3>");
+    let forecastIcon = $("<img>");
+    let forecastTemp = $("<li>");
+    let forecastWind = $("<li>");
+    let forecastHumidity = $("<li>");
 
     //attr
-    forecastBox.classList.add("forecast");
-    forecastDate.textContent = "Forecast Date";
-    forecastIcon.textContent = "cloudy";
-    forecastTemp.textContent = "Forecast Temp";
-    forecastWind.textContent = "Forecast Wind";
-    forecastHumidity.textContent = "Forecast Humidity";
+    forecastBox.addClass("forecast");
+    forecastDate.text("Forecast Date: " + dayjs().add(i, 'day').format("MMMM DD YYYY"));
+    forecastIcon.attr("src", iconUrl + forecastJsonData.list[i].weather[0].icon + iconTag);  
+    forecastTemp.text("Temperature: " + forecastJsonData.list[i].main.temp + " °F");
+    forecastWind.text("Wind: " + forecastJsonData.list[i].wind.speed + " mph");
+    forecastHumidity.text("Humidity: " + forecastJsonData.list[i].main.humidity + " %");
 
     //append
-    document.body.appendChild(forecastBox);
-    forecastBox.appendChild(forecastDate);
-    forecastBox.appendChild(forecastIcon);
-    forecastBox.appendChild(forecastTemp);
-    forecastBox.appendChild(forecastWind);
-    forecastBox.appendChild(forecastHumidity);
+    forecastContainer.append(forecastBox);
+    forecastBox.append(forecastDate);
+    forecastBox.append(forecastIcon);
+    forecastBox.append(forecastTemp);
+    forecastBox.append(forecastWind);
+    forecastBox.append(forecastHumidity);
   }
 }
 
 // geo coding api call to get longitude and latitude of a city / state / country code
 // http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key}
 // example is New Brunswick below
-// https://api.openweathermap.org/geo/1.0/direct?q=New+Brunswick&limit=1&appid=161b355a9dd41b55204725cd903f95ab
+// https://api.openweathermap.org/geo/1.0/direct?q=New+Brunswick&limit  =1&appid=161b355a9dd41b55204725cd903f95ab
 // [{"name":"New Brunswick","local_names":{"en":"New Brunswick"},"lat":40.4862174,"lon":-74.4518173,"country":"US","state":"New Jersey"}]
 
 // weather api call to get weather of a longitude and latitude
