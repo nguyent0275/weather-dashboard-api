@@ -1,41 +1,52 @@
 let currentDate = dayjs().format("MMMM DD YYYY");
 let previousLocation = $("#locations");
-let weatherDivContainer = $('#weather')
-let forecastDivContainer = $('#forecast')
-const savedCities = [];
+let weatherDivContainer = $("#weather");
+let forecastDivContainer = $("#forecast");
+let arraySavedCities = localStorage.getItem("cities"); //string
+if (arraySavedCities){
+  const savedCities = JSON.parse(arraySavedCities);//array
+  loadSavedLocations(savedCities);
+}
+// empty array that will be populated by each of the user's inputs
 
-loadSavedLocations();
-
+// search button will run 2 functions, 
+// 1. a function for populating the page with html and data
+// 2. a fuction for creating save data and redirect buttons
 $("#search").on("click", createElement);
+$("#search").on("click", saveLocation);
+
+// clear the html of the divs and repopulate them 
 function createElement() {
-  weatherDivContainer.html("")
-  forecastDivContainer.html("")
+  weatherDivContainer.html("");
+  forecastDivContainer.html("");
   requestLocation();
-  saveLocation();
 }
 
-$('#delete').on('click', function(){
-  previousLocation.html("")
-  localStorage.clear()
-})
+// clears the local storage and the html of the div
+$("#delete").on("click", function () {
+  previousLocation.html("");
+  localStorage.clear();
+});
 
+// getting array from local storage and creating buttons to redirect user to previous searches 
 function loadSavedLocations() {
-  let arraySavedCities = localStorage.getItem("cities"); //string
-  const citiesArrayParsed = JSON.parse(arraySavedCities); //array
-  if (citiesArrayParsed) {
-    for (let i = 0; i < citiesArrayParsed.length; i++) {
+    for (let i = 0; i < savedCities.length; i++) {
       //create
       let storedCity = $("<button>");
       //attr
-      storedCity.text(citiesArrayParsed[i]);
+      storedCity.text(savedCities[i]);
+      storedCity.click(() => {
+        $("#city").val(savedCities[i]);
+        createElement();
+      });
       //append
       previousLocation.append(storedCity);
-    }
   }
 }
 
+// saves the user search as a button and appends to page
 function saveLocation() {
-  let userLocation = $("input:text").val();
+  let userLocation = $("#city").val();
   savedCities.push(userLocation);
   const stringSavedCities = JSON.stringify(savedCities);
   localStorage.setItem("cities", stringSavedCities);
@@ -43,13 +54,18 @@ function saveLocation() {
   let previousCity = $("<button>");
   //attr
   previousCity.text(userLocation);
+  previousCity.click(() => {
+    $("#city").val(userLocation);
+    createElement();
+  });
   //append
   previousLocation.append(previousCity);
 }
 
+// uses geo coding api to take user input and returns a latitude and longitude cooordinate
 async function requestLocation() {
   let geoAPIUrl = "https://api.openweathermap.org/geo/1.0/direct?";
-  let locationQuery = $("input:text").val();
+  let locationQuery = $("#city").val();
   let geoParameters = {
     q: locationQuery,
     limit: 1,
@@ -68,6 +84,7 @@ async function requestLocation() {
   await requestForecast(latitude, longitude);
 }
 
+// passes the latitude and longitude from the geocode api to request the weather of the specified location
 async function requestWeather(latitude, longitude) {
   let weatherAPIUrl = "https://api.openweathermap.org/data/2.5/weather?";
   let weatherParameters = {
@@ -85,6 +102,7 @@ async function requestWeather(latitude, longitude) {
   weatherTodayEl(weatherJsonData);
 }
 
+// passes the latitude and longitude from the geocode api to request the next 5 day forecast of the specified location
 async function requestForecast(latitude, longitude) {
   let forecastAPIUrl = "https://api.openweathermap.org/data/2.5/forecast?";
   let forecastParameters = {
@@ -101,9 +119,12 @@ async function requestForecast(latitude, longitude) {
   console.log(forecastJsonData);
   fiveDayForecastEl(forecastJsonData);
 }
+
+// url for getting icon based on the weather data
 let iconUrl = "https://openweathermap.org/img/wn/";
 let iconTag = "@2x.png";
 
+// populates the page with html elements that contain info from the weatherapi fetch for today's weather data
 function weatherTodayEl(weatherJsonData) {
   //create
   let todayContainer = $("<div>");
@@ -115,7 +136,7 @@ function weatherTodayEl(weatherJsonData) {
   let humidity = $("<li>");
   //attr
   todayContainer.addClass("today");
-  todayDate.text($("input:text").val() + " " + currentDate);
+  todayDate.text($("#city").val() + " " + currentDate);
   weatherContainer.addClass("today");
   weatherIcon.attr("src", iconUrl + weatherJsonData.weather[0].icon + iconTag);
   temp.text("Temperature: " + weatherJsonData.main.temp + " °F");
@@ -131,6 +152,7 @@ function weatherTodayEl(weatherJsonData) {
   weatherContainer.append(humidity);
 }
 
+// populates the page with html elements that contain info from the weather api fetch for forecast data
 function fiveDayForecastEl(forecastJsonData) {
   let forecastContainer = $("<div>");
   let forecastText = $("<h2>");
@@ -153,7 +175,10 @@ function fiveDayForecastEl(forecastJsonData) {
     //attr
     forecastBox.addClass("forecast");
     forecastDate.text(
-      "Forecast Date: " + dayjs().add(i+1, "day").format("MMMM DD YYYY")
+      "Forecast Date: " +
+        dayjs()
+          .add(i + 1, "day")
+          .format("MMMM DD YYYY")
     );
     forecastIcon.attr(
       "src",
@@ -176,23 +201,3 @@ function fiveDayForecastEl(forecastJsonData) {
     forecastBox.append(forecastHumidity);
   }
 }
-
-// geo coding api call to get longitude and latitude of a city / state / country code
-// http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key}
-// example is New Brunswick below
-// https://api.openweathermap.org/geo/1.0/direct?q=New+Brunswick&limit  =1&appid=161b355a9dd41b55204725cd903f95ab
-// [{"name":"New Brunswick","local_names":{"en":"New Brunswick"},"lat":40.4862174,"lon":-74.4518173,"country":"US","state":"New Jersey"}]
-
-// weather api call to get weather of a longitude and latitude
-// https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=imperial&appid={API key}
-// example is New Brunswick's weather
-// https://api.openweathermap.org/data/2.5/weather?lat=40.4862174&lon=-74.4518173&units=imperial&appid=161b355a9dd41b55204725cd903f95ab
-// {"coord":{"lon":-74.4518,"lat":40.4862},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":296.57,"feels_like":296.77,"temp_min":294.57,"temp_max":298.42,"pressure":1017,"humidity":69},"visibility":10000,"wind":{"speed":1.79,"deg":292,"gust":4.47},"clouds":{"all":0},"dt":1698505393,"sys":{"type":2,"id":2076514,"country":"US","sunrise":1698492162,"sunset":1698530418},"timezone":-14400,"id":5101717,"name":"New Brunswick","cod":200}
-
-// weather api call to get weather for 5 days 3 hour forecast
-// https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&units=imperial&appid={API key}
-// example is New Brunswick 5 day forecast
-// https://api.openweathermap.org/data/2.5/forecast?lat=40.4862174&lon=-74.4518173&units=imperial&appid=161b355a9dd41b55204725cd903f95ab
-//
-// $(function () {
-// 'https://api.openweathermap.org/geo/1.0/direct?q=' + '{user-input}' + '&limit=1&appid=161b355a9dd41b55204725cd903f95ab'
