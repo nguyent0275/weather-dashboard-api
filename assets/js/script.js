@@ -1,39 +1,50 @@
-let currentDate = dayjs().format("MMMM DD YYYY")
-let previousLocation = $('.locations')
-const savedCities = []
-loadSavedLocations()
+let currentDate = dayjs().format("MMMM DD YYYY");
+let previousLocation = $("#locations");
+let weatherDivContainer = $('#weather')
+let forecastDivContainer = $('#forecast')
+const savedCities = [];
+
+loadSavedLocations();
+
 $("#search").on("click", createElement);
-async function createElement() {
-  await requestLocation();
-  saveLocation()
+function createElement() {
+  weatherDivContainer.html("")
+  forecastDivContainer.html("")
+  requestLocation();
+  saveLocation();
 }
-function loadSavedLocations(){
-  let arraySavedCities = localStorage.getItem('cities') //string
-  const citiesArrayParsed = JSON.parse(arraySavedCities) //array
-  if (arraySavedCities){
+
+$('#delete').on('click', function(){
+  previousLocation.html("")
+  localStorage.clear()
+})
+
+function loadSavedLocations() {
+  let arraySavedCities = localStorage.getItem("cities"); //string
+  const citiesArrayParsed = JSON.parse(arraySavedCities); //array
+  if (citiesArrayParsed) {
     for (let i = 0; i < citiesArrayParsed.length; i++) {
       //create
-      let previousCity = ('<li>')
+      let storedCity = $("<button>");
       //attr
-      previousCity.text(citiesArrayParsed[i])
+      storedCity.text(citiesArrayParsed[i]);
       //append
-      previousLocation.append(previousCity)
+      previousLocation.append(storedCity);
     }
   }
 }
-function saveLocation(){
-  savedCities.push($("input:text").val())
-  const stringSavedCities = JSON.stringify(savedCities)
-  localStorage.setItem("cities", stringSavedCities)
-  let arraySavedCities = localStorage.getItem('cities')
-  const citiesArrayParsed = JSON.parse(arraySavedCities)
-  console.log(citiesArrayParsed)
+
+function saveLocation() {
+  let userLocation = $("input:text").val();
+  savedCities.push(userLocation);
+  const stringSavedCities = JSON.stringify(savedCities);
+  localStorage.setItem("cities", stringSavedCities);
   //create
-  let previousCity = $('<li>')
+  let previousCity = $("<button>");
   //attr
-  previousCity.text(citiesArrayParsed[citiesArrayParsed.length - 1])
+  previousCity.text(userLocation);
   //append
-  previousLocation.append(previousCity)
+  previousLocation.append(previousCity);
 }
 
 async function requestLocation() {
@@ -90,15 +101,15 @@ async function requestForecast(latitude, longitude) {
   console.log(forecastJsonData);
   fiveDayForecastEl(forecastJsonData);
 }
-let iconUrl = "https://openweathermap.org/img/wn/"
-let iconTag = "@2x.png"
+let iconUrl = "https://openweathermap.org/img/wn/";
+let iconTag = "@2x.png";
 
 function weatherTodayEl(weatherJsonData) {
   //create
   let todayContainer = $("<div>");
   let todayDate = $("<h1>");
   let weatherContainer = $("<ul>");
-  let weatherIcon = $("<img>")
+  let weatherIcon = $("<img>");
   let temp = $("<li>");
   let wind = $("<li>");
   let humidity = $("<li>");
@@ -106,14 +117,14 @@ function weatherTodayEl(weatherJsonData) {
   todayContainer.addClass("today");
   todayDate.text($("input:text").val() + " " + currentDate);
   weatherContainer.addClass("today");
-  weatherIcon.attr("src", iconUrl + weatherJsonData.weather[0].icon + iconTag); 
+  weatherIcon.attr("src", iconUrl + weatherJsonData.weather[0].icon + iconTag);
   temp.text("Temperature: " + weatherJsonData.main.temp + " °F");
-  wind.text("Wind: " +weatherJsonData.wind.speed + " mph");
-  humidity.text("Humidity: " +weatherJsonData.main.humidity + " %");
+  wind.text("Wind: " + weatherJsonData.wind.speed + " mph");
+  humidity.text("Humidity: " + weatherJsonData.main.humidity + " %");
   //append
-  $(document.body).append(todayContainer);
+  $(weatherDivContainer).append(todayContainer);
   todayContainer.append(todayDate);
-  todayContainer.append(weatherIcon)
+  todayContainer.append(weatherIcon);
   todayContainer.append(weatherContainer);
   weatherContainer.append(temp);
   weatherContainer.append(wind);
@@ -123,15 +134,15 @@ function weatherTodayEl(weatherJsonData) {
 function fiveDayForecastEl(forecastJsonData) {
   let forecastContainer = $("<div>");
   let forecastText = $("<h2>");
-  forecastContainer.addClass("forecast-container")
-  forecastText.text("5 Day Forecast")
-  $(document.body).append(forecastText)
-  $(document.body).append(forecastContainer)
+  forecastContainer.addClass("forecast-container");
+  forecastText.text("5 Day Forecast");
+  $(forecastDivContainer).append(forecastText);
+  $(forecastDivContainer).append(forecastContainer);
 
   for (let i = 0; i < 5; i++) {
     //create
-    console.log(forecastJsonData.list[i].weather[0].icon)
-    console.log(typeof(forecastJsonData.list[i].weather[0].icon))
+    console.log(forecastJsonData.list[i].weather[0].icon);
+    console.log(typeof forecastJsonData.list[i].weather[0].icon);
     let forecastBox = $("<div>");
     let forecastDate = $("<h3>");
     let forecastIcon = $("<img>");
@@ -141,11 +152,20 @@ function fiveDayForecastEl(forecastJsonData) {
 
     //attr
     forecastBox.addClass("forecast");
-    forecastDate.text("Forecast Date: " + dayjs().add(i, 'day').format("MMMM DD YYYY"));
-    forecastIcon.attr("src", iconUrl + forecastJsonData.list[i].weather[0].icon + iconTag);  
-    forecastTemp.text("Temperature: " + forecastJsonData.list[i].main.temp + " °F");
+    forecastDate.text(
+      "Forecast Date: " + dayjs().add(i+1, "day").format("MMMM DD YYYY")
+    );
+    forecastIcon.attr(
+      "src",
+      iconUrl + forecastJsonData.list[i].weather[0].icon + iconTag
+    );
+    forecastTemp.text(
+      "Temperature: " + forecastJsonData.list[i].main.temp + " °F"
+    );
     forecastWind.text("Wind: " + forecastJsonData.list[i].wind.speed + " mph");
-    forecastHumidity.text("Humidity: " + forecastJsonData.list[i].main.humidity + " %");
+    forecastHumidity.text(
+      "Humidity: " + forecastJsonData.list[i].main.humidity + " %"
+    );
 
     //append
     forecastContainer.append(forecastBox);
