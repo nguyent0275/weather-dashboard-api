@@ -1,3 +1,7 @@
 .forecast-container {
     display: flex;
 }
+
+li {
+    list-style-type: none;
+}

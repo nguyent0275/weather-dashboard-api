@@ -1,16 +1,39 @@
 let currentDate = dayjs().format("MMMM DD YYYY")
+let previousLocation = $('.locations')
+const savedCities = []
+loadSavedLocations()
 $("#search").on("click", createElement);
 async function createElement() {
   await requestLocation();
   saveLocation()
 }
-
+function loadSavedLocations(){
+  let arraySavedCities = localStorage.getItem('cities') //string
+  const citiesArrayParsed = JSON.parse(arraySavedCities) //array
+  if (arraySavedCities){
+    for (let i = 0; i < citiesArrayParsed.length; i++) {
+      //create
+      let previousCity = ('<li>')
+      //attr
+      previousCity.text(citiesArrayParsed[i])
+      //append
+      previousLocation.append(previousCity)
+    }
+  }
+}
 function saveLocation(){
-  localStorage.setItem("location", $("input:text").val())
-  localStorage.getItem("location")
-  let savedlocation = $('</li>')
-  savedlocation.text(localStorage.getItem("location"))
-  $('locations').append(savedlocation)
+  savedCities.push($("input:text").val())
+  const stringSavedCities = JSON.stringify(savedCities)
+  localStorage.setItem("cities", stringSavedCities)
+  let arraySavedCities = localStorage.getItem('cities')
+  const citiesArrayParsed = JSON.parse(arraySavedCities)
+  console.log(citiesArrayParsed)
+  //create
+  let previousCity = $('<li>')
+  //attr
+  previousCity.text(citiesArrayParsed[citiesArrayParsed.length - 1])
+  //append
+  previousLocation.append(previousCity)
 }
 
 async function requestLocation() {
