@@ -14,7 +14,7 @@ This is an application for checking the weather and forecast for a location spec
 https://nguyent0275.github.io/weather-dashboard-api/
 
 ## Image
-![Image of the Weather Dashboard APP]()
+![Image of the Weather Dashboard APP](/assets/images/weather-dashboard-api.png)
 
 ## Features
 - Custom User Inputs: Track the weather of any location that the user could want.

@@ -3,19 +3,22 @@ let previousLocation = $("#locations");
 let weatherDivContainer = $("#weather");
 let forecastDivContainer = $("#forecast");
 let arraySavedCities = localStorage.getItem("cities"); //string
-if (arraySavedCities){
-  const savedCities = JSON.parse(arraySavedCities);//array
-  loadSavedLocations(savedCities);
+var cities = [];
+if (arraySavedCities) {
+  const savedCities = JSON.parse(arraySavedCities); //array
+  if (savedCities && savedCities.length > 0) {
+    loadSavedLocations(savedCities);
+  }
 }
 // empty array that will be populated by each of the user's inputs
 
-// search button will run 2 functions, 
+// search button will run 2 functions,
 // 1. a function for populating the page with html and data
 // 2. a fuction for creating save data and redirect buttons
 $("#search").on("click", createElement);
 $("#search").on("click", saveLocation);
 
-// clear the html of the divs and repopulate them 
+// clear the html of the divs and repopulate them
 function createElement() {
   weatherDivContainer.html("");
   forecastDivContainer.html("");
@@ -23,33 +26,43 @@ function createElement() {
 }
 
 // clears the local storage and the html of the div
-$("#delete").on("click", function () {
+$("#delete").on("click", clearData);
+
+function clearData() {
   previousLocation.html("");
   localStorage.clear();
-});
+  cities = [];
+}
 
-// getting array from local storage and creating buttons to redirect user to previous searches 
-function loadSavedLocations() {
-    for (let i = 0; i < savedCities.length; i++) {
-      //create
-      let storedCity = $("<button>");
-      //attr
-      storedCity.text(savedCities[i]);
-      storedCity.click(() => {
-        $("#city").val(savedCities[i]);
-        createElement();
-      });
-      //append
-      previousLocation.append(storedCity);
+function saveCities() {
+  const stringifiedCities = JSON.stringify(cities);
+  localStorage.setItem("cities", stringifiedCities);
+}
+
+// getting array from local storage and creating buttons to redirect user to previous searches
+function loadSavedLocations(savedCitiesToLoad) {
+  for (let i = 0; i < savedCitiesToLoad.length; i++) {
+    //create
+    let storedCity = $("<button>");
+    //attr
+    cities.push(savedCitiesToLoad[i]);
+    storedCity.text(savedCitiesToLoad[i]);
+    storedCity.click(() => {
+      $("#city").val(savedCitiesToLoad[i]);
+      createElement();
+    });
+    //append
+    previousLocation.append(storedCity);
   }
 }
 
 // saves the user search as a button and appends to page
 function saveLocation() {
   let userLocation = $("#city").val();
-  savedCities.push(userLocation);
-  const stringSavedCities = JSON.stringify(savedCities);
-  localStorage.setItem("cities", stringSavedCities);
+  if (userLocation) {
+    cities.push(userLocation);
+    saveCities();
+  }
   //create
   let previousCity = $("<button>");
   //attr
