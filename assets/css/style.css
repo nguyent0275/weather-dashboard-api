@@ -1,7 +1,11 @@
-.today {
-    background-color: blue;
+.forecast-container {
+    display: flex;
 }
 
-.forecast {
-    background-color: purple;
+li {
+    list-style-type: none;
+}
+
+#locations {
+    display: block;
 }
