@@ -58,6 +58,7 @@ $(function () {
   //     }
 });
 
+
 // let searchButton = document.getElementById('search')
 // searchButton.addEventListener('click', weatherToday)
 // function weatherToday(){
