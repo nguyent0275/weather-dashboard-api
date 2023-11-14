@@ -7,9 +7,13 @@ li {
 }
 
 #locations {
-  display: block;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 .forecast {
   margin: 1%;
 }
+
+#loadinjg

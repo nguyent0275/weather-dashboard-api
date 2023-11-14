@@ -14,7 +14,7 @@
   </head>
   <body>
     <h1>Weather Dashboard</h1>
-    <h2>Search for a City:</h2>
+    <h2>Search for a Location:</h2>
     <input id="city" type="text" />
     <button id="search">Search</button>
     <button id="delete">Clear Previous Locations</button>
@@ -24,6 +24,10 @@
     </div>
     <div id="weather"></div>
     <div id="forecast"></div>
+
+    <div id="loading-icon" class="spinner-border" role="status" style="display: none;">
+      <span class="sr-only"></span>
+    </div>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
