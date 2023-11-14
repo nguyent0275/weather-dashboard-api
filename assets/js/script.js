@@ -1,44 +1,14 @@
-let currentDate = dayjs().format("MMMM DD YYYY");
 let previousLocation = $("#locations");
 let weatherDivContainer = $("#weather");
 let forecastDivContainer = $("#forecast");
 let arraySavedCities = localStorage.getItem("cities"); //string
-var cities = [];
+var cities = []; //global empty array
+// checks if there is data from local storage and if its greater than 0, then double checks that the parsed data is there and greater than 0 / passes that data to function that loads stored locations
 if (arraySavedCities && arraySavedCities.length > 0) {
   const savedCities = JSON.parse(arraySavedCities); //array
   if (savedCities && savedCities.length > 0) {
     loadSavedLocations(savedCities);
   }
-}
-// empty array that will be populated by each of the user's inputs
-
-// search button will run 2 functions,
-// 1. a function for populating the page with html and data
-// 2. a fuction for creating save data and redirect buttons
-// $("#search").on("click", createElement);
-$("#search").on("click", saveLocation);
-
-// clear the html of the divs and repopulate them
-async function createElement() {
-  weatherDivContainer.html("");
-  forecastDivContainer.html("");
-  $("#loading-icon").css("display", "block");
-  await requestLocation();
-}
-
-// clears the local storage and the html of the div
-$("#delete").on("click", clearData);
-
-function clearData() {
-  previousLocation.html("");
-  localStorage.clear();
-  cities = [];
-}
-
-// saving the user data and storing to local storage
-function saveCities() {
-  const stringifiedCities = JSON.stringify(cities);
-  localStorage.setItem("cities", stringifiedCities);
 }
 
 // getting array from local storage and creating buttons to redirect user to previous searches
@@ -58,7 +28,15 @@ function loadSavedLocations(savedCitiesToLoad) {
   }
 }
 
-// saves the user search as a button and appends to page
+$("#search").on("click", saveLocation);
+
+// saving the user data and storing to local storage
+function saveCities() {
+  const stringifiedCities = JSON.stringify(cities);
+  localStorage.setItem("cities", stringifiedCities);
+}
+
+// saves the user search as a button and appends to page // checks for duplicate inputs and throw an alert error
 function saveLocation() {
   let userLocation = $("#city").val();
   const citiesLowerCase = cities.map((city) => city.toLowerCase());
@@ -77,7 +55,6 @@ function saveLocation() {
     //append
     previousLocation.append(previousCity);
     createElement();
-    $("#city").val("");
   } else {
     alert("Dupicate location or invalid data");
     const filteredCities = cities.filter((city) => city !== userLocation);
@@ -87,7 +64,15 @@ function saveLocation() {
   }
 }
 
-// uses geo coding api to take user input and returns a latitude and longitude cooordinate
+// clear the html of the divs and repopulate them
+async function createElement() {
+  weatherDivContainer.html("");
+  forecastDivContainer.html("");
+  $("#loading-icon").css("display", "block");
+  await requestLocation();
+}
+
+// uses geo coding api to take user input and returns a latitude and longitude cooordinate // checks for inputs that will not return a coordinate and throw an alert error
 async function requestLocation() {
   let geoAPIUrl = "https://api.openweathermap.org/geo/1.0/direct?";
   let locationQuery = $("#city").val();
@@ -115,7 +100,6 @@ async function requestLocation() {
       const stringifiedCities = JSON.stringify(filteredCities);
       localStorage.setItem("cities", stringifiedCities);
     }
-    $("#city").val("");
   }
 }
 
@@ -157,11 +141,14 @@ async function requestForecast(latitude, longitude) {
 let iconUrl = "https://openweathermap.org/img/wn/";
 let iconTag = "@2x.png";
 
+let currentDate = dayjs().format("MMMM DD YYYY");
+
 // populates the page with html elements that contain info from the weatherapi fetch for today's weather data
 function weatherTodayEl(weatherJsonData) {
   //create
   let todayContainer = $("<div>");
-  let todayDate = $("<h1>");
+  let weatherLocation = $("<h1>");
+  let todayDate = $("<h2>");
   let weatherContainer = $("<ul>");
   let weatherIcon = $("<img>");
   let temp = $("<li>");
@@ -169,7 +156,9 @@ function weatherTodayEl(weatherJsonData) {
   let humidity = $("<li>");
   //attr
   todayContainer.addClass("today");
-  todayDate.text($("#city").val() + " " + currentDate);
+  weatherLocation.text($("#city").val());
+  $("#city").val("");
+  todayDate.text(currentDate);
   weatherContainer.addClass("today");
   weatherIcon.attr("src", iconUrl + weatherJsonData.weather[0].icon + iconTag);
   temp.text("Temperature: " + weatherJsonData.main.temp + " °F");
@@ -177,6 +166,7 @@ function weatherTodayEl(weatherJsonData) {
   humidity.text("Humidity: " + weatherJsonData.main.humidity + " %");
   //append
   $(weatherDivContainer).append(todayContainer);
+  todayContainer.append(weatherLocation);
   todayContainer.append(todayDate);
   todayContainer.append(weatherIcon);
   todayContainer.append(weatherContainer);
@@ -231,4 +221,13 @@ function fiveDayForecastEl(forecastJsonData) {
     forecastBox.append(forecastWind);
     forecastBox.append(forecastHumidity);
   }
+}
+
+$("#delete").on("click", clearData);
+
+// clears the local storage and the html of the div
+function clearData() {
+  previousLocation.html("");
+  localStorage.clear();
+  cities = [];
 }
